@@ -40,6 +40,10 @@ interface TokenHolding {
   priceChange24h: number;
 }
 
+interface NFTRewardsByToken {
+  [tokenAddress: string]: string; // token address -> reward amount in wei
+}
+
 interface NFTHolding {
   contractAddress: string;
   tokenId: string;
@@ -47,8 +51,8 @@ interface NFTHolding {
   image: string | null;
   collectionName: string | null;
   chain: string;
-  linkedToken: Token | null;
-  pendingRewards: string;
+  rewardsByToken: NFTRewardsByToken;
+  totalRewards: string;
 }
 
 type TabType = 'tokens' | 'nfts';
@@ -136,6 +140,44 @@ function TabSwitcher({ active, onChange }: { active: TabType; onChange: (tab: Ta
   );
 }
 
+function TokenFilter({ 
+  tokens, 
+  selectedToken, 
+  onSelect 
+}: { 
+  tokens: Token[]; 
+  selectedToken: string | null; 
+  onSelect: (address: string | null) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      <button
+        onClick={() => onSelect(null)}
+        className={`px-3 py-1.5 text-xs font-bold border transition-colors ${
+          selectedToken === null
+            ? 'bg-white text-black border-white'
+            : 'bg-black text-white border-neutral-600 hover:border-white'
+        }`}
+      >
+        ALL TOKENS
+      </button>
+      {tokens.map((token) => (
+        <button
+          key={token.address}
+          onClick={() => onSelect(token.address)}
+          className={`px-3 py-1.5 text-xs font-bold border transition-colors ${
+            selectedToken === token.address
+              ? 'bg-white text-black border-white'
+              : 'bg-black text-white border-neutral-600 hover:border-white'
+          }`}
+        >
+          ${token.symbol}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function TokenImage({ imageUrl, symbol }: { imageUrl: string | null; symbol: string }) {
   const [error, setError] = useState(false);
   const url = getImageUrl(imageUrl);
@@ -212,10 +254,11 @@ function TokenHoldingRow({ holding, index }: { holding: TokenHolding; index: num
   );
 }
 
-// NFT Card Component - Simplified
-function NFTCard({ nft }: { nft: NFTHolding }) {
+// NFT Card Component
+function NFTCard({ nft, displayRewards }: { nft: NFTHolding; displayRewards: string }) {
   const [imageError, setImageError] = useState(false);
-  const hasPendingRewards = parseFloat(nft.pendingRewards) > 0;
+  const rewardsNum = parseFloat(displayRewards);
+  const hasPendingRewards = rewardsNum > 0;
   
   return (
     <Link 
@@ -245,7 +288,7 @@ function NFTCard({ nft }: { nft: NFTHolding }) {
         )}
       </div>
       
-      {/* Info - Simplified */}
+      {/* Info */}
       <div className="p-3 border-t border-neutral-800">
         {/* Collection Name */}
         <div className="font-mono font-bold text-sm truncate">
@@ -255,18 +298,11 @@ function NFTCard({ nft }: { nft: NFTHolding }) {
         {/* Token ID */}
         <div className="text-neutral-500 text-xs">#{nft.tokenId}</div>
         
-        {/* Linked Token Name */}
-        {nft.linkedToken && (
-          <div className="mt-2 text-xs text-neutral-400">
-            {nft.linkedToken.name}
-          </div>
-        )}
-        
-        {/* Total Claimable WETH */}
+        {/* Claimable WETH - full decimals, smaller font */}
         {hasPendingRewards && (
           <div className="mt-2 pt-2 border-t border-neutral-800">
-            <div className="font-mono text-green-500 text-sm font-bold">
-              {parseFloat(nft.pendingRewards).toFixed(6)} WETH
+            <div className="font-mono text-green-500 text-[10px] font-bold break-all leading-tight">
+              {displayRewards} WETH
             </div>
           </div>
         )}
@@ -289,6 +325,15 @@ export default function PortfolioPage() {
   const [loadingTokens, setLoadingTokens] = useState(false);
   const [loadingNfts, setLoadingNfts] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTokenFilter, setSelectedTokenFilter] = useState<string | null>(null);
+
+  // Get unique tokens that have NFT collections (for filter)
+  const tokensWithNfts = useMemo(() => {
+    return tokens.filter(t => 
+      t.nft_collection && 
+      t.nft_collection !== '0x0000000000000000000000000000000000000000'
+    );
+  }, [tokens]);
 
   // Total portfolio value
   const totalValue = useMemo(() => {
@@ -425,10 +470,8 @@ export default function PortfolioPage() {
             t => t.nft_collection.toLowerCase() === nft.contractAddress.toLowerCase()
           );
 
-          // Use first linked token for display name
-          const linkedToken = linkedTokens.length > 0 ? linkedTokens[0] : null;
-
-          // Sum rewards across ALL tokens linked to this NFT collection
+          // Get rewards for each token
+          const rewardsByToken: NFTRewardsByToken = {};
           let totalRewards = BigInt(0);
 
           if (linkedTokens.length > 0 && publicClient) {
@@ -440,25 +483,27 @@ export default function PortfolioPage() {
                   functionName: 'claimable',
                   args: [token.address as `0x${string}`, BigInt(nft.tokenId)],
                 });
-                totalRewards += amount as bigint;
+                const amountBigInt = amount as bigint;
+                rewardsByToken[token.address.toLowerCase()] = amountBigInt.toString();
+                totalRewards += amountBigInt;
               } catch (e) {
-                // Ignore errors
+                rewardsByToken[token.address.toLowerCase()] = '0';
               }
             }
           }
 
           nftHoldingsWithRewards.push({
             ...nft,
-            linkedToken,
-            pendingRewards: formatEther(totalRewards),
+            rewardsByToken,
+            totalRewards: totalRewards.toString(),
           });
         }
 
-        // Sort by pending rewards (highest first), then by tokenId
+        // Sort by total rewards (highest first), then by tokenId
         nftHoldingsWithRewards.sort((a, b) => {
-          const rewardsA = parseFloat(a.pendingRewards);
-          const rewardsB = parseFloat(b.pendingRewards);
-          if (rewardsA !== rewardsB) return rewardsB - rewardsA;
+          const rewardsA = BigInt(a.totalRewards);
+          const rewardsB = BigInt(b.totalRewards);
+          if (rewardsA !== rewardsB) return rewardsA > rewardsB ? -1 : 1;
           return parseInt(a.tokenId) - parseInt(b.tokenId);
         });
 
@@ -475,10 +520,29 @@ export default function PortfolioPage() {
     fetchNfts();
   }, [activeTab, isConnected, address, tokens, publicClient]);
 
-  // Total pending rewards
+  // Calculate display rewards based on filter
+  const getDisplayRewards = (nft: NFTHolding): string => {
+    if (selectedTokenFilter === null) {
+      // Show total rewards
+      return formatEther(BigInt(nft.totalRewards));
+    } else {
+      // Show rewards for selected token only
+      const tokenRewards = nft.rewardsByToken[selectedTokenFilter.toLowerCase()] || '0';
+      return formatEther(BigInt(tokenRewards));
+    }
+  };
+
+  // Total pending rewards (respects filter)
   const totalPendingRewards = useMemo(() => {
-    return nftHoldings.reduce((sum, n) => sum + parseFloat(n.pendingRewards), 0);
-  }, [nftHoldings]);
+    if (selectedTokenFilter === null) {
+      return nftHoldings.reduce((sum, n) => sum + parseFloat(formatEther(BigInt(n.totalRewards))), 0);
+    } else {
+      return nftHoldings.reduce((sum, n) => {
+        const tokenRewards = n.rewardsByToken[selectedTokenFilter.toLowerCase()] || '0';
+        return sum + parseFloat(formatEther(BigInt(tokenRewards)));
+      }, 0);
+    }
+  }, [nftHoldings, selectedTokenFilter]);
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -532,10 +596,10 @@ export default function PortfolioPage() {
               {activeTab === 'nfts' && totalPendingRewards > 0 && (
                 <div className="mt-4 pt-4 border-t border-neutral-800">
                   <div className="text-xs font-bold tracking-widest text-neutral-500 mb-1 font-mono">
-                    TOTAL PENDING REWARDS
+                    {selectedTokenFilter ? 'FILTERED PENDING REWARDS' : 'TOTAL PENDING REWARDS'}
                   </div>
                   <div className="text-xl font-bold font-mono text-green-500">
-                    {totalPendingRewards.toFixed(6)} WETH
+                    {totalPendingRewards.toFixed(18)} WETH
                   </div>
                   <Link 
                     href="/claim" 
@@ -549,6 +613,18 @@ export default function PortfolioPage() {
 
             {/* Tab Switcher */}
             <TabSwitcher active={activeTab} onChange={setActiveTab} />
+
+            {/* Token Filter (NFTs tab only) */}
+            {activeTab === 'nfts' && tokensWithNfts.length > 0 && (
+              <div className="border border-neutral-800 p-3">
+                <div className="text-[10px] text-neutral-500 font-mono mb-2 tracking-widest">FILTER BY TOKEN</div>
+                <TokenFilter 
+                  tokens={tokensWithNfts} 
+                  selectedToken={selectedTokenFilter} 
+                  onSelect={setSelectedTokenFilter} 
+                />
+              </div>
+            )}
 
             {/* Error State */}
             {error && (
@@ -638,7 +714,8 @@ export default function PortfolioPage() {
                     {nftHoldings.map((nft) => (
                       <NFTCard 
                         key={`${nft.contractAddress}-${nft.tokenId}`} 
-                        nft={nft} 
+                        nft={nft}
+                        displayRewards={getDisplayRewards(nft)}
                       />
                     ))}
                   </div>
@@ -650,7 +727,7 @@ export default function PortfolioPage() {
             <div className="text-[10px] text-neutral-600 font-mono space-y-0.5">
               <p>• Token balances fetched via Alchemy API</p>
               <p>• Price data from GeckoTerminal</p>
-              <p>• Rewards summed across all tokens linked to NFT collection</p>
+              <p>• Rewards from FeeDistributor contract</p>
             </div>
           </div>
         )}
