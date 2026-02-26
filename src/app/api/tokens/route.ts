@@ -7,12 +7,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit') || '50';
     const offset = searchParams.get('offset') || '0';
-    const chain = searchParams.get('chain');
 
-    let queryString = `limit=${limit}&offset=${offset}`;
-    if (chain) {
-      queryString += `&chain=${chain}`;
-    }
+    // Always filter to Base only
+    const queryString = `limit=${limit}&offset=${offset}&chain=base`;
 
     const response = await fetch(
       `${INDEXER_API_URL}/tokens?${queryString}`,
