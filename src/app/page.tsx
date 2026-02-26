@@ -20,7 +20,7 @@ export default function Home() {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="font-bold text-lg uppercase tracking-wide">Deploy</h2>
-                  <p className="text-neutral-500 text-sm">Launch a new token</p>
+                  <p className="text-neutral-500 text-sm">Launch a new token linked to any ERC721 NFT collection on Base</p>
                 </div>
                 <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
