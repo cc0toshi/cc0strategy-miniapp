@@ -195,6 +195,16 @@ export default function DocsPage() {
                 <span>→</span>
               </div>
             </a>
+            <a 
+              href="https://farcaster.xyz/miniapps/N7O9MvQ8wid_/cc0strategy" 
+              target="_blank" 
+              className="block border-2 border-white p-4 hover:bg-white hover:text-black transition-colors"
+            >
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-sm">FARCASTER MINI APP</span>
+                <span>→</span>
+              </div>
+            </a>
           </div>
         </section>
       </div>
