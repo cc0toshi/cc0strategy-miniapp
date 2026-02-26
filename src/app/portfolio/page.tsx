@@ -68,10 +68,6 @@ const FEE_DISTRIBUTOR_ABI = [
 ] as const;
 
 // Helper functions
-function formatAddress(address: string): string {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`;
-}
-
 function formatUsd(num: number): string {
   if (num === 0) return '$0.00';
   if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(2)}M`;
@@ -216,7 +212,7 @@ function TokenHoldingRow({ holding, index }: { holding: TokenHolding; index: num
   );
 }
 
-// NFT Card Component
+// NFT Card Component - Simplified
 function NFTCard({ nft }: { nft: NFTHolding }) {
   const [imageError, setImageError] = useState(false);
   const hasPendingRewards = parseFloat(nft.pendingRewards) > 0;
@@ -249,25 +245,29 @@ function NFTCard({ nft }: { nft: NFTHolding }) {
         )}
       </div>
       
-      {/* Info */}
+      {/* Info - Simplified */}
       <div className="p-3 border-t border-neutral-800">
+        {/* Collection Name */}
         <div className="font-mono font-bold text-sm truncate">
-          {nft.collectionName || formatAddress(nft.contractAddress)}
+          {nft.collectionName || 'Unknown Collection'}
         </div>
+        
+        {/* Token ID */}
         <div className="text-neutral-500 text-xs">#{nft.tokenId}</div>
         
-        {/* Linked Token */}
+        {/* Linked Token Name */}
         {nft.linkedToken && (
           <div className="mt-2 text-xs text-neutral-400">
-            Linked: ${nft.linkedToken.symbol}
+            {nft.linkedToken.name}
           </div>
         )}
         
-        {/* Pending Rewards */}
+        {/* Total Claimable WETH */}
         {hasPendingRewards && (
           <div className="mt-2 pt-2 border-t border-neutral-800">
-            <div className="text-[10px] text-neutral-500 uppercase tracking-wider">Pending</div>
-            <div className="font-mono text-green-500 text-sm">{parseFloat(nft.pendingRewards).toFixed(6)} WETH</div>
+            <div className="font-mono text-green-500 text-sm font-bold">
+              {parseFloat(nft.pendingRewards).toFixed(6)} WETH
+            </div>
           </div>
         )}
       </div>
@@ -286,7 +286,6 @@ export default function PortfolioPage() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [holdings, setHoldings] = useState<TokenHolding[]>([]);
   const [nftHoldings, setNftHoldings] = useState<NFTHolding[]>([]);
-  const [priceData, setPriceData] = useState<Record<string, PriceData>>({});
   const [loadingTokens, setLoadingTokens] = useState(false);
   const [loadingNfts, setLoadingNfts] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -302,7 +301,6 @@ export default function PortfolioPage() {
       .then(res => res.json())
       .then(data => {
         if (data.tokens) {
-          // Filter to Base tokens only
           const baseTokens = data.tokens.filter((t: Token) => !t.chain || t.chain === 'base');
           setTokens(baseTokens);
         }
@@ -322,13 +320,8 @@ export default function PortfolioPage() {
       setError(null);
 
       try {
-        // Prepare tokens (Base only)
-        const tokenList = tokens.map(t => ({ 
-          address: t.address, 
-          chain: 'base' 
-        }));
+        const tokenList = tokens.map(t => ({ address: t.address, chain: 'base' }));
 
-        // Fetch balances via our API
         const res = await fetch('/api/portfolio/tokens', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -340,7 +333,6 @@ export default function PortfolioPage() {
         const data = await res.json();
         const balances = data.balances || {};
 
-        // Fetch prices
         const pricesRes = await fetch('/api/prices', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -351,10 +343,8 @@ export default function PortfolioPage() {
         if (pricesRes.ok) {
           const pricesData = await pricesRes.json();
           prices = pricesData.prices || {};
-          setPriceData(prices);
         }
 
-        // Build holdings
         const newHoldings: TokenHolding[] = [];
         
         for (const token of tokens) {
@@ -381,7 +371,6 @@ export default function PortfolioPage() {
           });
         }
 
-        // Sort by value descending
         newHoldings.sort((a, b) => b.valueUsd - a.valueUsd);
         setHoldings(newHoldings);
 
@@ -407,13 +396,9 @@ export default function PortfolioPage() {
       setError(null);
 
       try {
-        // Get unique NFT collections from tokens (Base only)
         const collections = tokens
           .filter(t => t.nft_collection && t.nft_collection !== '0x0000000000000000000000000000000000000000')
-          .map(t => ({ 
-            address: t.nft_collection, 
-            chain: 'base' 
-          }));
+          .map(t => ({ address: t.nft_collection, chain: 'base' }));
 
         if (collections.length === 0) {
           setNftHoldings([]);
@@ -421,7 +406,6 @@ export default function PortfolioPage() {
           return;
         }
 
-        // Fetch NFTs via our API
         const res = await fetch('/api/portfolio/nfts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -433,36 +417,40 @@ export default function PortfolioPage() {
         const data = await res.json();
         const nfts = data.nfts || [];
 
-        // Build NFT holdings with linked tokens and pending rewards
         const nftHoldingsWithRewards: NFTHolding[] = [];
 
         for (const nft of nfts) {
-          // Find linked token
-          const linkedToken = tokens.find(
+          // Find ALL tokens linked to this NFT collection
+          const linkedTokens = tokens.filter(
             t => t.nft_collection.toLowerCase() === nft.contractAddress.toLowerCase()
-          ) || null;
+          );
 
-          let pendingRewards = '0';
+          // Use first linked token for display name
+          const linkedToken = linkedTokens.length > 0 ? linkedTokens[0] : null;
 
-          // Fetch pending rewards if we have a linked token and public client
-          if (linkedToken && publicClient) {
-            try {
-              const amount = await publicClient.readContract({
-                address: CONTRACTS.FEE_DISTRIBUTOR as `0x${string}`,
-                abi: FEE_DISTRIBUTOR_ABI,
-                functionName: 'claimable',
-                args: [linkedToken.address as `0x${string}`, BigInt(nft.tokenId)],
-              });
-              pendingRewards = formatEther(amount as bigint);
-            } catch (e) {
-              // Ignore errors
+          // Sum rewards across ALL tokens linked to this NFT collection
+          let totalRewards = BigInt(0);
+
+          if (linkedTokens.length > 0 && publicClient) {
+            for (const token of linkedTokens) {
+              try {
+                const amount = await publicClient.readContract({
+                  address: CONTRACTS.FEE_DISTRIBUTOR as `0x${string}`,
+                  abi: FEE_DISTRIBUTOR_ABI,
+                  functionName: 'claimable',
+                  args: [token.address as `0x${string}`, BigInt(nft.tokenId)],
+                });
+                totalRewards += amount as bigint;
+              } catch (e) {
+                // Ignore errors
+              }
             }
           }
 
           nftHoldingsWithRewards.push({
             ...nft,
             linkedToken,
-            pendingRewards,
+            pendingRewards: formatEther(totalRewards),
           });
         }
 
@@ -661,8 +649,8 @@ export default function PortfolioPage() {
             {/* Footer Info */}
             <div className="text-[10px] text-neutral-600 font-mono space-y-0.5">
               <p>• Token balances fetched via Alchemy API</p>
-              <p>• Price data from GeckoTerminal (updates every 60s)</p>
-              <p>• Pending rewards calculated from FeeDistributor contract</p>
+              <p>• Price data from GeckoTerminal</p>
+              <p>• Rewards summed across all tokens linked to NFT collection</p>
             </div>
           </div>
         )}
