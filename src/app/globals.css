@@ -1,59 +1,165 @@
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ═══════════════════════════════════════════════════════════════
+   CC0STRATEGY — BRUTALIST EDITORIAL DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #111111;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #888888;
+  --border-color: #ffffff;
+  --border-light: #333333;
 }
 
-html,
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: #ffffff;
+  color: #000000;
+}
+
 body {
-  background-color: #000;
-  color: #fff;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-space-mono), 'Space Mono', monospace;
+}
+
+/* Typography */
+.font-editorial {
+  font-family: var(--font-space-mono), 'Space Mono', monospace;
+  letter-spacing: -0.02em;
+}
+
+.headline-xl {
+  font-size: clamp(2rem, 6vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+
+.headline-lg {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.headline-md {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.caption {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Brutalist Components */
+.btn-primary {
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #ffffff;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+
+.btn-primary:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+.btn-primary:disabled {
+  background: #333333;
+  border-color: #333333;
+  color: #666666;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  padding: 1rem 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+
+.btn-secondary:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+.input-brutal {
+  width: 100%;
+  background: transparent;
+  border: 2px solid #ffffff;
+  padding: 1rem;
+  color: #ffffff;
+  font-family: var(--font-space-mono), 'Space Mono', monospace;
+}
+
+.input-brutal:focus {
+  outline: none;
+  box-shadow: 4px 4px 0 0 #ffffff;
+}
+
+.input-brutal::placeholder {
+  color: #666666;
+}
+
+.card-brutal {
+  border: 2px solid #ffffff;
+  padding: 1.5rem;
+}
+
+.card-brutal-hover:hover {
+  box-shadow: 8px 8px 0 0 #ffffff;
+  transform: translate(-4px, -4px);
+}
+
+/* Layout */
+.container-editorial {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Link underline animation */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+
+.link-underline:hover::after {
+  width: 100%;
 }
 
 /* Safe area for mobile */
-.safe-area-inset-bottom {
+.safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: #000;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #333;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Input styles */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Select styles */
-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
-  padding-right: 40px;
 }
