@@ -413,15 +413,15 @@ function SwapPageContent() {
       <TokenSearchBar tokens={allTokens} selectedToken={selectedToken} onSelect={setSelectedToken} isLoading={isLoadingTokens} />
       <TokenHeader token={selectedToken} priceData={tokenPriceData} />
       
-      <div className="grid lg:grid-cols-12 gap-6">
-        <div className="border-2 border-white flex flex-col lg:col-span-8">
+      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="border-2 border-white flex flex-col lg:col-span-8 order-2 lg:order-1">
           <div className="border-b-2 border-white p-4"><span className="font-editorial text-sm uppercase tracking-widest">PRICE CHART</span></div>
           {selectedToken ? (
-            <iframe src={`https://www.geckoterminal.com/base/pools/${selectedToken.address}?embed=1&info=0&swaps=0&grayscale=1`} width="100%" height="100%" style={{ minHeight: "400px" }} frameBorder="0" className="bg-black block w-full" title="Price Chart" />
+            <iframe src={`https://www.geckoterminal.com/base/pools/${selectedToken.address}?embed=1&info=0&swaps=0&grayscale=1`} width="100%" height="100%" style={{ minHeight: "300px", maxHeight: "50vh" }} frameBorder="0" className="bg-black block w-full" title="Price Chart" />
           ) : <div className="min-h-[400px] flex items-center justify-center text-neutral-600 text-sm">Select a token to view chart</div>}
         </div>
 
-        <div className="border-2 border-white lg:col-span-4">
+        <div className="border-2 border-white lg:col-span-4 order-1 lg:order-2">
           {!isConnected ? (
             <div className="p-8 text-center">
               <div className="font-editorial text-xl mb-6">WALLET REQUIRED</div>
