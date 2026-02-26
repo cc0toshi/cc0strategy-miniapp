@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJtaW5pYXBwLmNjMHN0cmF0ZWd5LmZ1biJ9",
+    "signature": "placeholder_signature"
+  },
+  "frame": {
+    "version": "1",
+    "name": "cc0strategy",
+    "iconUrl": "https://cc0strategy.fun/icon.png",
+    "homeUrl": "https://miniapp.cc0strategy.fun",
+    "imageUrl": "https://cc0strategy.fun/og-image.png",
+    "buttonTitle": "Trade",
+    "splashImageUrl": "https://cc0strategy.fun/icon.png",
+    "splashBackgroundColor": "#000000"
+  }
+}
