@@ -1,17 +1,21 @@
 {
   "accountAssociation": {
-    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "header": "eyJmaWQiOjM0ODY5MywidHlwZSI6ImF1dGgiLCJrZXkiOiIweDE3RUJCZjQ1NzQ2ZGE2OUNENTAzOTVBOTI1NzAwNTkyMjdEQUVBODUifQ",
     "payload": "eyJkb21haW4iOiJtaW5pYXBwLmNjMHN0cmF0ZWd5LmZ1biJ9",
-    "signature": "placeholder_signature"
+    "signature": "+pmD/iXaEyolpITPrbHEmSQmun1DDjLxQqaE6wLkWM5rjnIa4Rg3t1z9gK8mkTN5F9QCI9vxjSUqXIxYj4/vHhw="
   },
   "frame": {
     "version": "1",
-    "name": "cc0strategy",
-    "iconUrl": "https://cc0strategy.fun/icon.png",
+    "name": "CC0STRATEGY",
+    "description": "Token launchpad where trading fees go to NFT holders",
+    "primaryCategory": "finance",
+    "iconUrl": "https://miniapp.cc0strategy.fun/icon.png",
     "homeUrl": "https://miniapp.cc0strategy.fun",
-    "imageUrl": "https://cc0strategy.fun/og-image.png",
+    "imageUrl": "https://miniapp.cc0strategy.fun/og-image.png",
+    "ogTitle": "CC0STRATEGY",
+    "ogDescription": "Token launchpad where trading fees go to NFT holders",
     "buttonTitle": "Trade",
-    "splashImageUrl": "https://cc0strategy.fun/icon.png",
+    "splashImageUrl": "https://miniapp.cc0strategy.fun/icon.png",
     "splashBackgroundColor": "#000000"
   }
 }
