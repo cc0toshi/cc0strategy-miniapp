@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAccount, useConnect, useDisconnect, usePublicClient } from 'wagmi';
+import { useAccount, useConnect, useDisconnect, usePublicClient, useBalance } from 'wagmi';
 import { formatUnits, formatEther } from 'viem';
 import { CONTRACTS } from '@/config/contracts';
 
@@ -41,7 +41,7 @@ interface TokenHolding {
 }
 
 interface NFTRewardsByToken {
-  [tokenAddress: string]: string; // token address -> reward amount in wei
+  [tokenAddress: string]: string;
 }
 
 interface NFTHolding {
@@ -318,6 +318,11 @@ export default function PortfolioPage() {
   const { disconnect } = useDisconnect();
   const publicClient = usePublicClient();
   
+  // Get ETH balance
+  const { data: ethBalance } = useBalance({
+    address: address,
+  });
+  
   const [activeTab, setActiveTab] = useState<TabType>('tokens');
   const [tokens, setTokens] = useState<Token[]>([]);
   const [holdings, setHoldings] = useState<TokenHolding[]>([]);
@@ -465,12 +470,10 @@ export default function PortfolioPage() {
         const nftHoldingsWithRewards: NFTHolding[] = [];
 
         for (const nft of nfts) {
-          // Find ALL tokens linked to this NFT collection
           const linkedTokens = tokens.filter(
             t => t.nft_collection.toLowerCase() === nft.contractAddress.toLowerCase()
           );
 
-          // Get rewards for each token
           const rewardsByToken: NFTRewardsByToken = {};
           let totalRewards = BigInt(0);
 
@@ -499,7 +502,6 @@ export default function PortfolioPage() {
           });
         }
 
-        // Sort by total rewards (highest first), then by tokenId
         nftHoldingsWithRewards.sort((a, b) => {
           const rewardsA = BigInt(a.totalRewards);
           const rewardsB = BigInt(b.totalRewards);
@@ -523,10 +525,8 @@ export default function PortfolioPage() {
   // Calculate display rewards based on filter
   const getDisplayRewards = (nft: NFTHolding): string => {
     if (selectedTokenFilter === null) {
-      // Show total rewards
       return formatEther(BigInt(nft.totalRewards));
     } else {
-      // Show rewards for selected token only
       const tokenRewards = nft.rewardsByToken[selectedTokenFilter.toLowerCase()] || '0';
       return formatEther(BigInt(tokenRewards));
     }
@@ -585,31 +585,48 @@ export default function PortfolioPage() {
               </button>
             </div>
 
-            {/* Total Value Card */}
-            <div className="border-2 border-white p-4">
-              <div className="text-xs font-bold tracking-widest text-neutral-500 mb-2 font-mono">
-                TOTAL PORTFOLIO VALUE
-              </div>
-              <div className="text-3xl font-black font-mono">
-                {formatUsd(totalValue)}
-              </div>
-              {activeTab === 'nfts' && totalPendingRewards > 0 && (
-                <div className="mt-4 pt-4 border-t border-neutral-800">
-                  <div className="text-xs font-bold tracking-widest text-neutral-500 mb-1 font-mono">
-                    {selectedTokenFilter ? 'FILTERED PENDING REWARDS' : 'TOTAL PENDING REWARDS'}
-                  </div>
-                  <div className="text-xl font-bold font-mono text-green-500">
-                    {totalPendingRewards.toFixed(18)} WETH
-                  </div>
-                  <Link 
-                    href="/claim" 
-                    className="inline-block mt-3 text-sm text-white underline hover:no-underline"
-                  >
-                    Claim all rewards →
-                  </Link>
+            {/* Balance Cards */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* ETH Balance */}
+              <div className="border-2 border-white p-4">
+                <div className="text-xs font-bold tracking-widest text-neutral-500 mb-2 font-mono">
+                  ETH BALANCE
                 </div>
-              )}
+                <div className="text-2xl font-black font-mono">
+                  {ethBalance ? parseFloat(formatEther(ethBalance.value)).toFixed(4) : '0.0000'}
+                </div>
+                <div className="text-neutral-500 text-xs font-mono">ETH</div>
+              </div>
+
+              {/* Total Portfolio Value */}
+              <div className="border-2 border-white p-4">
+                <div className="text-xs font-bold tracking-widest text-neutral-500 mb-2 font-mono">
+                  PORTFOLIO VALUE
+                </div>
+                <div className="text-2xl font-black font-mono">
+                  {formatUsd(totalValue)}
+                </div>
+                <div className="text-neutral-500 text-xs font-mono">USD</div>
+              </div>
             </div>
+
+            {/* Pending Rewards (NFTs tab) */}
+            {activeTab === 'nfts' && totalPendingRewards > 0 && (
+              <div className="border-2 border-green-500 p-4">
+                <div className="text-xs font-bold tracking-widest text-neutral-500 mb-1 font-mono">
+                  {selectedTokenFilter ? 'FILTERED PENDING REWARDS' : 'TOTAL PENDING REWARDS'}
+                </div>
+                <div className="text-xl font-bold font-mono text-green-500">
+                  {totalPendingRewards.toFixed(18)} WETH
+                </div>
+                <Link 
+                  href="/claim" 
+                  className="inline-block mt-2 text-sm text-white underline hover:no-underline"
+                >
+                  Claim all rewards →
+                </Link>
+              </div>
+            )}
 
             {/* Tab Switcher */}
             <TabSwitcher active={activeTab} onChange={setActiveTab} />
