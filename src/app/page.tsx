@@ -4,62 +4,105 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white p-4">
-      <div className="text-center pt-8 pb-6">
-        <h1 className="text-4xl font-black tracking-tight mb-1">cc0strategy</h1>
-        <p className="text-neutral-500 text-sm">NFT holder fee distribution</p>
-      </div>
-      
-      <div className="space-y-3 max-w-md mx-auto">
-        <Link href="/browse" className="block">
-          <div className="border-2 border-white p-5 hover:bg-neutral-900 transition-colors">
-            <h2 className="text-lg font-black mb-0.5">BROWSE</h2>
-            <p className="text-neutral-500 text-xs">Discover all tokens</p>
-          </div>
-        </Link>
-
-        <Link href="/swap" className="block">
-          <div className="border-2 border-white p-5 hover:bg-neutral-900 transition-colors">
-            <h2 className="text-lg font-black mb-0.5">SWAP</h2>
-            <p className="text-neutral-500 text-xs">Trade cc0 tokens</p>
-          </div>
-        </Link>
+    <div className="min-h-screen bg-black text-white">
+      <div className="container-editorial py-8">
+        {/* Hero */}
+        <div className="text-center mb-10">
+          <h1 className="headline-xl font-editorial mb-3">CC0STRATEGY</h1>
+          <p className="text-neutral-500 text-sm max-w-xs mx-auto">
+            Token launchpad where trading fees flow directly to NFT holders
+          </p>
+        </div>
         
-        <Link href="/claim" className="block">
-          <div className="border-2 border-white p-5 hover:bg-neutral-900 transition-colors">
-            <h2 className="text-lg font-black mb-0.5">CLAIM</h2>
-            <p className="text-neutral-500 text-xs">Claim WETH for NFT holders</p>
-          </div>
-        </Link>
-
-        <Link href="/deploy" className="block">
-          <div className="border-2 border-neutral-700 p-5 hover:border-white transition-colors">
-            <h2 className="text-lg font-black mb-0.5">DEPLOY</h2>
-            <p className="text-neutral-500 text-xs">Launch a new token</p>
-          </div>
-        </Link>
-
-        <Link href="/portfolio" className="block">
-          <div className="border-2 border-neutral-700 p-5 hover:border-white transition-colors">
-            <h2 className="text-lg font-black mb-0.5">PORTFOLIO</h2>
-            <p className="text-neutral-500 text-xs">View your holdings</p>
-          </div>
-        </Link>
-        
-        <div className="flex gap-3 pt-2">
-          <Link href="/about" className="flex-1">
-            <div className="border border-neutral-800 p-3 hover:border-neutral-600 transition-colors text-center">
-              <span className="text-xs font-bold text-neutral-500">ABOUT</span>
+        {/* Main Actions */}
+        <div className="space-y-3">
+          <Link href="/browse" className="block">
+            <div className="card-brutal card-brutal-hover transition-all">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-lg uppercase tracking-wide">Browse</h2>
+                  <p className="text-neutral-500 text-sm">Discover all tokens</p>
+                </div>
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
           </Link>
-          <Link href="/docs" className="flex-1">
-            <div className="border border-neutral-800 p-3 hover:border-neutral-600 transition-colors text-center">
-              <span className="text-xs font-bold text-neutral-500">DOCS</span>
+
+          <Link href="/swap" className="block">
+            <div className="card-brutal card-brutal-hover transition-all">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-lg uppercase tracking-wide">Trade</h2>
+                  <p className="text-neutral-500 text-sm">Buy & sell tokens</p>
+                </div>
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+          
+          <Link href="/claim" className="block">
+            <div className="card-brutal card-brutal-hover transition-all">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-lg uppercase tracking-wide">Claim</h2>
+                  <p className="text-neutral-500 text-sm">Collect WETH rewards</p>
+                </div>
+                <svg className="w-6 h-6 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/deploy" className="block">
+            <div className="border-2 border-neutral-700 p-6 hover:border-white transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-lg uppercase tracking-wide text-neutral-400">Deploy</h2>
+                  <p className="text-neutral-600 text-sm">Launch a new token</p>
+                </div>
+                <svg className="w-6 h-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </div>
             </div>
           </Link>
         </div>
 
-        <div className="text-center pt-4">
+        {/* Info Card */}
+        <div className="mt-8 border border-neutral-800 p-5">
+          <p className="caption text-neutral-600 mb-3">HOW IT WORKS</p>
+          <ul className="space-y-2 text-sm text-neutral-400">
+            <li className="flex items-start gap-2">
+              <span className="text-white">•</span>
+              <span>Trading fees go to NFT holders</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-white">•</span>
+              <span>80% to holders, 20% protocol</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-white">•</span>
+              <span>Claim WETH anytime</span>
+            </li>
+          </ul>
+        </div>
+        
+        {/* Footer Links */}
+        <div className="flex gap-3 mt-6">
+          <Link href="/about" className="flex-1 text-center py-3 border border-neutral-800 text-neutral-500 text-xs uppercase tracking-wider hover:border-white hover:text-white transition-colors">
+            About
+          </Link>
+          <Link href="/docs" className="flex-1 text-center py-3 border border-neutral-800 text-neutral-500 text-xs uppercase tracking-wider hover:border-white hover:text-white transition-colors">
+            Docs
+          </Link>
+        </div>
+
+        <div className="text-center mt-6">
           <a
             href="https://cc0strategy.fun"
             target="_blank"
