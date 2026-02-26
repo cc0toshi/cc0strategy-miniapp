@@ -5,7 +5,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container-editorial py-8">
+      <div className="container-editorial pt-16 pb-8">
         {/* Hero */}
         <div className="text-center mb-10">
           <h1 className="headline-xl font-editorial mb-3">CC0STRATEGY</h1>
